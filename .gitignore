@@ -4,6 +4,17 @@
 *.pyc
 *.swp
 .DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.db
+.env
+
+# ML artifacts (large binaries)
+/models/
+/reports/
 .atom/
 .build/
 .buildlog/

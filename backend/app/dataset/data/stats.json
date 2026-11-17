@@ -1,0 +1,74 @@
+{
+  "rows": 13600,
+  "by_split": {
+    "train": 8502,
+    "test_unseen_template": 2919,
+    "validation": 897,
+    "test_unseen_merchant": 1282
+  },
+  "is_transaction": {
+    "true": 9600,
+    "false": 4000
+  },
+  "by_category": {
+    "Education": 600,
+    "Shopping": 600,
+    "Healthcare": 600,
+    "Cash Withdrawal": 600,
+    "Utilities": 600,
+    "Refund": 600,
+    "Transfer": 600,
+    "Fees": 600,
+    "Travel": 600,
+    "Transportation": 600,
+    "Groceries": 600,
+    "Restaurants": 600,
+    "Subscription": 600,
+    "Income": 600,
+    "Entertainment": 600,
+    "Personal Care": 600
+  },
+  "by_non_txn_type": {
+    "balance_alert": 500,
+    "promo": 500,
+    "declined": 500,
+    "bill_reminder": 500,
+    "security_alert": 500,
+    "otp": 500,
+    "service_info": 500,
+    "phishing": 500
+  },
+  "by_language": {
+    "en": 8359,
+    "ar": 5241
+  },
+  "by_template_origin": {
+    "invented": 10131,
+    "repo_mock": 3351,
+    "invented_from_real": 61,
+    "real": 57
+  },
+  "n_templates": 82,
+  "held_out_templates": [
+    "bal_en_2",
+    "billrem_ar_1",
+    "bm_bill_ar",
+    "bm_ecom_en",
+    "bm_fee_ar",
+    "bm_instapay_in_ar",
+    "bm_salary_en",
+    "bm_transfer_ar",
+    "cib_atm",
+    "cib_refund",
+    "dec_ar_2",
+    "info_en_stmt",
+    "nbe_credit_ar",
+    "nbe_purchase_ar",
+    "otp_ar_purchase",
+    "phish_en_prize",
+    "promo_ar_discount",
+    "qnb_purchase_ar",
+    "sec_en_pwd"
+  ],
+  "n_held_out_merchant_bases": 38
+}
