@@ -5,6 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.provider.Settings
 import android.provider.Telephony
 import androidx.core.app.ActivityCompat
@@ -18,7 +21,16 @@ class MainActivity : FlutterActivity() {
     private val channelName = "com.example.financial_coach/sms"
     private val eventChannelName = "com.example.financial_coach/sms_events"
     private val permissionRequestCode = 4201
+    private val voicePermissionRequestCode = 4202
     private var pendingPermissionResult: MethodChannel.Result? = null
+    private var pendingVoiceResult: MethodChannel.Result? = null
+    private var speechRecognizer: SpeechRecognizer? = null
+
+    private val voiceChannelName = "com.example.financial_coach/voice"
+    private val voiceEventChannelName = "com.example.financial_coach/voice_events"
+    private val voicePermissionRequestCode = 4202
+    private var pendingVoiceResult: MethodChannel.Result? = null
+    private var speechRecognizer: SpeechRecognizer? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -56,7 +68,30 @@ class MainActivity : FlutterActivity() {
                     SmsEvents.attach(null)
                 }
             })
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, voiceChannelName)
+    .setMethodCallHandler { call, result ->
+        when (call.method) {
+            "startVoiceRecording" -> startVoiceRecording(result)
+            "stopVoiceRecording" -> {
+                val recognizer = speechRecognizer
+                if (recognizer == null) {
+                    result.error("not_recording", "Voice input is not active", null)
+                } else {
+                    VoiceEvents.emit(mapOf("type" to "processing"))
+                    try { recognizer.stopListening(); result.success(true) }
+                    catch (e: Exception) { result.error("stop_failed", e.message ?: "Could not stop", null) }
+                }
+            }
+            "cancelVoiceRecording" -> { cancelVoiceRecording(); result.success(true) }
+            else -> result.notImplemented()
+        }
+    }
 
+EventChannel(flutterEngine.dartExecutor.binaryMessenger, voiceEventChannelName)
+    .setStreamHandler(object : EventChannel.StreamHandler {
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { VoiceEvents.attach(events) }
+        override fun onCancel(arguments: Any?) { VoiceEvents.attach(null) }
+    })
         Thread {
             val sync = SmsSync.flush(applicationContext)
             SmsEvents.emit(mapOf(
@@ -83,17 +118,22 @@ class MainActivity : FlutterActivity() {
         pendingPermissionResult = result
         ActivityCompat.requestPermissions(this, arrayOf(
             Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS
-        ), 4201)
+        ), permissionRequestCode)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 4201) {
-            pendingPermissionResult?.success(hasReadPermission())
-            pendingPermissionResult = null
-            if (hasReceivePermission()) Thread { SmsSync.flush(applicationContext) }.start()
-        }
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == 4201) {  // SMS
+        pendingPermissionResult?.success(hasReadPermission())
+        pendingPermissionResult = null
+        if (hasReceivePermission()) Thread { SmsSync.flush(applicationContext) }.start()
+    } else if (requestCode == 4202) {  // Voice
+        val pending = pendingVoiceResult ?: return
+        val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        if (granted) beginSpeechRecognition()
+        else { pendingVoiceResult = null; pending.error("microphone_permission_denied", "Allow microphone access", null) }
     }
+}
 
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
@@ -142,5 +182,107 @@ class MainActivity : FlutterActivity() {
             }
         }.start()
     }
+    private fun hasMicrophonePermission(): Boolean =
+    ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+
+private fun startVoiceRecording(result: MethodChannel.Result) {
+    if (pendingVoiceResult != null) {
+        result.error("in_progress", "Voice recognition is already running", null); return
+    }
+    if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+        result.error("voice_unavailable", "No speech recognition service available", null); return
+    }
+    pendingVoiceResult = result
+    if (!hasMicrophonePermission()) {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), voicePermissionRequestCode)
+        return
+    }
+    beginSpeechRecognition()
 }
-EOF
+
+private fun beginSpeechRecognition() {
+    if (pendingVoiceResult == null) return
+    try {
+        val recognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        speechRecognizer = recognizer
+        recognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) { VoiceEvents.emit(mapOf("type" to "ready")) }
+            override fun onBeginningOfSpeech() { VoiceEvents.emit(mapOf("type" to "listening")) }
+            override fun onRmsChanged(rmsdB: Float) { VoiceEvents.emit(mapOf("type" to "level", "level" to rmsdB)) }
+            override fun onBufferReceived(buffer: ByteArray?) = Unit
+            override fun onEndOfSpeech() { VoiceEvents.emit(mapOf("type" to "processing")) }
+            override fun onError(error: Int) {
+                val message = when (error) {
+                    SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech recognized. Try again."
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission required."
+                    else -> "Speech recognition failed (code $error)."
+                }
+                finishVoiceError(message)
+            }
+            override fun onResults(results: Bundle?) {
+                val transcript = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull().orEmpty()
+                finishVoiceSuccess(transcript)
+            }
+            override fun onPartialResults(partialResults: Bundle?) {
+                val transcript = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+                if (!transcript.isNullOrBlank()) VoiceEvents.emit(mapOf("type" to "partial", "transcript" to transcript))
+            }
+            override fun onEvent(eventType: Int, params: Bundle?) = Unit
+        })
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault().toLanguageTag())
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
+        VoiceEvents.emit(mapOf("type" to "ready"))
+        recognizer.startListening(intent)
+    } catch (error: Exception) {
+        finishVoiceError(error.message ?: "Could not start speech recognition")
+    }
+}
+
+private fun finishVoiceSuccess(transcript: String) {
+    val result = pendingVoiceResult ?: return
+    pendingVoiceResult = null
+    destroySpeechRecognizer()
+    VoiceEvents.emit(mapOf("type" to "completed", "transcript" to transcript))
+    result.success(transcript)
+}
+
+private fun finishVoiceError(message: String) {
+    val result = pendingVoiceResult ?: return
+    pendingVoiceResult = null
+    destroySpeechRecognizer()
+    VoiceEvents.emit(mapOf("type" to "error", "message" to message))
+    result.error("speech_recognition_failed", message, null)
+}
+
+private fun cancelVoiceRecording() {
+    val result = pendingVoiceResult
+    pendingVoiceResult = null
+    destroySpeechRecognizer()
+    VoiceEvents.emit(mapOf("type" to "cancelled"))
+    result?.success(null)
+}
+
+private fun destroySpeechRecognizer() {
+    val recognizer = speechRecognizer ?: return
+    speechRecognizer = null
+    try { recognizer.cancel() } catch (_: Exception) {}
+    recognizer.destroy()
+}
+
+override fun onDestroy() {
+    cancelVoiceRecording()
+    super.onDestroy()
+}
+
+// Add to onRequestPermissionsResult (inside the existing method):
+// else if (requestCode == voicePermissionRequestCode) {
+//     val pending = pendingVoiceResult ?: return
+//     val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+//     if (granted) beginSpeechRecognition()
+//     else { pendingVoiceResult = null; pending.error("microphone_permission_denied", "Allow microphone access", null) }
+// }
+}

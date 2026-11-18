@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../voice.dart';
+import '../api.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -14,6 +16,32 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _descCtrl = TextEditingController();
   String _category = 'Groceries';
   final _categories = ['Groceries', 'Restaurants', 'Transportation', 'Shopping', 'Utilities', 'Healthcare', 'Entertainment', 'Subscription', 'Education', 'Travel', 'Personal Care', 'Transfer', 'Income', 'Cash Withdrawal', 'Fees', 'Refund'];
+
+  void _onVoiceResult(String transcript) async {
+    if (transcript.trim().isEmpty) return;
+    final result = await Api.parseSms('voice', transcript);
+    if (result['is_transaction'] == true) {
+      final tx = result['transaction'];
+      setState(() {
+        _amountCtrl.text = tx['amount'] ?? '';
+        _merchantCtrl.text = tx['merchant'] ?? '';
+        _category = tx['category'] ?? 'Other';
+        _descCtrl.text = tx['description'] ?? '';
+        _isExpense = tx['type'] != 'income';
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Parsed: ${tx['amount']} EGP at ${tx['merchant']}')),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not detect a transaction from speech')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +69,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             const SizedBox(height: 16),
             // Category
             DropdownButtonFormField<String>(
-              value: _category,
+              value: _categories.contains(_category) ? _category : 'Groceries',
               decoration: const InputDecoration(labelText: 'Category', prefixIcon: Icon(Icons.category)),
               items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
               onChanged: (v) => setState(() => _category = v!),
@@ -65,16 +93,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ),
             const SizedBox(height: 12),
             // Voice entry
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.mic, color: FC.deepBurgundy),
-                label: Text('Voice Entry', style: fcText(16, FontWeight.w600, FC.deepBurgundy)),
-                style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), side: const BorderSide(color: FC.deepBurgundy)),
-              ),
-            ),
+            VoiceEntryButton(onResult: _onVoiceResult),
           ],
         ),
       ),
