@@ -12,6 +12,8 @@ import 'screens/coach_screen.dart';
 import 'screens/budget_screen.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/income_screen.dart';
+import 'screens/installment_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

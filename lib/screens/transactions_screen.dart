@@ -12,16 +12,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   String _filter = 'All';
   final _filters = ['All', 'Income', 'Expense', 'Transfer'];
 
-  final List<Transaction> _txns = [
-    Transaction(id: '1', merchant: 'Carrefour', category: 'Groceries', amount: 1437.02, isIncome: false, date: DateTime(2025, 5, 23, 20, 55)),
-    Transaction(id: '2', merchant: 'Uber', category: 'Transportation', amount: 85.50, isIncome: false, date: DateTime(2025, 5, 22, 14, 30)),
-    Transaction(id: '3', merchant: 'Salary', category: 'Income', amount: 45000.0, isIncome: true, date: DateTime(2025, 5, 1, 9, 0)),
-    Transaction(id: '4', merchant: 'Netflix', category: 'Subscription', amount: 165.0, isIncome: false, date: DateTime(2025, 5, 20, 12, 0)),
-    Transaction(id: '5', merchant: 'Seif Pharmacy', category: 'Healthcare', amount: 320.0, isIncome: false, date: DateTime(2025, 5, 19, 16, 45)),
-    Transaction(id: '6', merchant: 'KFC', category: 'Restaurants', amount: 210.0, isIncome: false, date: DateTime(2025, 5, 18, 13, 0)),
-    Transaction(id: '7', merchant: 'Amazon.eg', category: 'Shopping', amount: 899.0, isIncome: false, date: DateTime(2025, 5, 17, 10, 0)),
-    Transaction(id: '8', merchant: 'Uber', category: 'Transportation', amount: 120.0, isIncome: false, date: DateTime(2025, 5, 16, 8, 30)),
-  ];
+  final List<Transaction> _txns = [];
 
   List<Transaction> get _filtered {
     if (_filter == 'All') return _txns;

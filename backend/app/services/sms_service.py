@@ -62,6 +62,7 @@ def import_sms_transaction(db: Session, sms: SmsMessage) -> str:
                 description=parsed.description,
                 category_id=category.id,
                 merchant=parsed.merchant,
+                sms_id=sms.id,
                 internal_reference=reference, source="sms",
             )
             db.add(tx); db.flush()

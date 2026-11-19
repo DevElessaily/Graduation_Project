@@ -6,14 +6,7 @@ class BudgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final budgets = [
-      ('Groceries', 3000.0, 1437.02, FC.softGreen),
-      ('Restaurants', 1500.0, 210.0, FC.softRed),
-      ('Transportation', 800.0, 205.5, const Color(0xFF5B8DEF)),
-      ('Shopping', 2000.0, 899.0, FC.mutedGold),
-      ('Healthcare', 1000.0, 320.0, FC.softRed),
-      ('Entertainment', 500.0, 0.0, FC.neutralGray),
-    ];
+    final budgets = <(String, double, double, Color)>[];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Budget Management')),
@@ -33,11 +26,11 @@ class BudgetScreen extends StatelessWidget {
                 children: [
                   Text('Monthly Budget', style: fcText(14, FontWeight.w500, Colors.white70)),
                   const SizedBox(height: 8),
-                  Text('EGP 8,800', style: fcText(28, FontWeight.w700, Colors.white)),
+                  Text('EGP 0', style: fcText(28, FontWeight.w700, Colors.white)),
                   const SizedBox(height: 4),
-                  Text('of EGP 10,000', style: fcText(13, FontWeight.w400, Colors.white60)),
+                  Text('of EGP 0', style: fcText(13, FontWeight.w400, Colors.white60)),
                   const SizedBox(height: 12),
-                  ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: 0.88, minHeight: 8, backgroundColor: Colors.white24, valueColor: const AlwaysStoppedAnimation(FC.mutedGold))),
+                  ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: 0, minHeight: 8, backgroundColor: Colors.white24, valueColor: const AlwaysStoppedAnimation(FC.mutedGold))),
                 ],
               ),
             ),

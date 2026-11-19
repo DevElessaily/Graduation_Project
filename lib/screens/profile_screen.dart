@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import 'income_screen.dart';
+import 'installment_screen.dart';
+import 'budget_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -45,6 +48,12 @@ class ProfileScreen extends StatelessWidget {
               _tile(Icons.dark_mode_outlined, 'Dark Mode'),
             ]),
             const SizedBox(height: 16),
+            _section('Financial', [
+              _tile(Icons.account_balance_wallet, 'Income', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IncomeScreen()))),
+              _tile(Icons.calendar_month, 'Installments', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InstallmentScreen()))),
+              _tile(Icons.account_balance, 'Budget', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BudgetScreen()))),
+            ]),
+            const SizedBox(height: 16),
             _section('Data', [
               _tile(Icons.sync, 'SMS Sync Settings'),
               _tile(Icons.cloud_upload, 'Backup & Restore'),
@@ -83,11 +92,11 @@ class ProfileScreen extends StatelessWidget {
     ],
   );
 
-  Widget _tile(IconData icon, String label) => ListTile(
+  Widget _tile(IconData icon, String label, {VoidCallback? onTap}) => ListTile(
     leading: Icon(icon, color: FC.deepBurgundy),
     title: Text(label, style: fcText(14, FontWeight.w500, FC.darkCharcoal)),
     trailing: const Icon(Icons.chevron_right, color: FC.neutralGray),
-    onTap: () {},
+    onTap: onTap ?? () {},
   );
 }
 EOF

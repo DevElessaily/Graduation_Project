@@ -11,17 +11,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _balanceVisible = true;
-  double _balance = 134370.20;
-  double _income = 45000.0;
-  double _expenses = 3972.0;
+  double _balance = 0.0;
+  double _income = 0.0;
+  double _expenses = 0.0;
 
-  final List<Transaction> _recent = [
-    Transaction(id: '1', merchant: 'Carrefour', category: 'Groceries', amount: 1437.02, isIncome: false, date: DateTime(2025, 5, 23, 20, 55)),
-    Transaction(id: '2', merchant: 'Uber', category: 'Transportation', amount: 85.50, isIncome: false, date: DateTime(2025, 5, 22, 14, 30)),
-    Transaction(id: '3', merchant: 'Salary', category: 'Income', amount: 45000.0, isIncome: true, date: DateTime(2025, 5, 1, 9, 0)),
-    Transaction(id: '4', merchant: 'Netflix', category: 'Subscription', amount: 165.0, isIncome: false, date: DateTime(2025, 5, 20, 12, 0)),
-    Transaction(id: '5', merchant: 'Seif Pharmacy', category: 'Healthcare', amount: 320.0, isIncome: false, date: DateTime(2025, 5, 19, 16, 45)),
-  ];
+  final List<Transaction> _recent = [];
 
   @override
   Widget build(BuildContext context) {
@@ -210,14 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _spendingOverview() {
-    // Category breakdown
-    final cats = <String, double>{
-      'Groceries': 1437.02,
-      'Transportation': 85.50,
-      'Subscription': 165.0,
-      'Healthcare': 320.0,
-      'Other': 1965.48,
-    };
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(color: FC.warmWhite, borderRadius: BorderRadius.circular(16)),
@@ -227,43 +213,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Text('Spending Overview', style: fcText(16, FontWeight.w700, FC.darkCharcoal)),
           const SizedBox(height: 4),
           Text('This month vs last month', style: fcText(12, FontWeight.w400, FC.neutralGray)),
-          const SizedBox(height: 16),
-          // Donut chart placeholder
-          Center(
-            child: SizedBox(
-              width: 160, height: 160,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    value: 0.65,
-                    strokeWidth: 16,
-                    backgroundColor: FC.lightGray,
-                    valueColor: AlwaysStoppedAnimation(FC.deepBurgundy),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('EGP', style: fcText(12, FontWeight.w400, FC.neutralGray)),
-                      Text(_fmt(_expenses), style: fcText(18, FontWeight.w700, FC.darkCharcoal)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...cats.entries.map((e) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Container(width: 12, height: 12, decoration: BoxDecoration(color: categoryColor(e.key), borderRadius: BorderRadius.circular(3))),
-                const SizedBox(width: 8),
-                Expanded(child: Text(e.key, style: fcText(13, FontWeight.w400, FC.darkCharcoal))),
-                Text('EGP ${_fmt(e.value)}', style: fcText(13, FontWeight.w600, FC.darkCharcoal)),
-              ],
-            ),
-          )),
+          const SizedBox(height: 24),
+          Center(child: Text('No spending data yet', style: fcText(14, FontWeight.w400, FC.neutralGray))),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -284,7 +236,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          ..._recent.map((t) => _transactionTile(t)),
+          if (_recent.isEmpty)
+            Center(child: Padding(padding: const EdgeInsets.all(16), child: Text('No transactions yet', style: fcText(13, FontWeight.w400, FC.neutralGray))))
+          else
+            ..._recent.map((t) => _transactionTile(t)),
         ],
       ),
     );

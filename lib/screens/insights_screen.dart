@@ -64,11 +64,7 @@ class InsightsScreen extends StatelessWidget {
                 children: [
                   Text('Category Breakdown', style: fcText(16, FontWeight.w700, FC.darkCharcoal)),
                   const SizedBox(height: 16),
-                  _catRow('Groceries', 1437.02, 0.36, FC.softGreen),
-                  _catRow('Healthcare', 320.0, 0.08, FC.softRed),
-                  _catRow('Subscription', 165.0, 0.04, FC.deepBurgundy),
-                  _catRow('Transportation', 205.5, 0.05, const Color(0xFF5B8DEF)),
-                  _catRow('Other', 1844.48, 0.47, FC.neutralGray),
+                  Center(child: Text('No spending data yet', style: fcText(13, FontWeight.w400, FC.neutralGray))),
                 ],
               ),
             ),
@@ -82,9 +78,7 @@ class InsightsScreen extends StatelessWidget {
                 children: [
                   Text('Top Spending Categories', style: fcText(16, FontWeight.w700, FC.darkCharcoal)),
                   const SizedBox(height: 12),
-                  _topCat('Groceries', 'EGP 1,437', Icons.shopping_cart_rounded, FC.softGreen),
-                  _topCat('Other', 'EGP 1,844', Icons.category_rounded, FC.neutralGray),
-                  _topCat('Healthcare', 'EGP 320', Icons.local_hospital_rounded, FC.softRed),
+                  Center(child: Text('No spending data yet', style: fcText(13, FontWeight.w400, FC.neutralGray))),
                 ],
               ),
             ),

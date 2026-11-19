@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 class Account(Base):
@@ -8,3 +9,6 @@ class Account(Base):
     name = Column(String(150), nullable=False, default="Main Account")
     currency_code = Column(String(10), nullable=False, default="EGP")
     balance = Column(String(50), nullable=False, default="0")
+
+    user = relationship("User", back_populates="accounts")
+    transactions = relationship("Transaction", back_populates="account", cascade="all, delete-orphan")
