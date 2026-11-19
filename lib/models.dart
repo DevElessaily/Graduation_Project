@@ -96,4 +96,3 @@ Color categoryColor(String category) {
     default: return const Color(0xFF858585);
   }
 }
-EOF

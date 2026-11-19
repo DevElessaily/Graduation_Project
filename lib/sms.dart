@@ -108,4 +108,3 @@ class SmsLive {
         .map((event) => SmsLiveEvent.fromMap(event as Map));
   }
 }
-EOF

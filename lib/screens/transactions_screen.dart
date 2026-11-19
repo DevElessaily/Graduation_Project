@@ -122,4 +122,3 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return '${d.day}/${d.month}';
   }
 }
-EOF

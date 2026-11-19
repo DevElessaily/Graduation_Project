@@ -122,4 +122,3 @@ class InsightsScreen extends StatelessWidget {
     ),
   );
 }
-EOF

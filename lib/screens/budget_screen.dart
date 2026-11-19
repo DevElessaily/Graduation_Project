@@ -67,4 +67,3 @@ class BudgetScreen extends StatelessWidget {
     );
   }
 }
-EOF

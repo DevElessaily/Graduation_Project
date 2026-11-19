@@ -128,4 +128,3 @@ class _SmsScreenState extends State<SmsScreen> {
     );
   }
 }
-EOF

@@ -373,4 +373,3 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${d.day}/${d.month}/${d.year}';
   }
 }
-EOF

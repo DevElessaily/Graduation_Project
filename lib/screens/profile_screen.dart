@@ -3,6 +3,7 @@ import '../theme.dart';
 import 'income_screen.dart';
 import 'installment_screen.dart';
 import 'budget_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -46,6 +47,7 @@ class ProfileScreen extends StatelessWidget {
               _tile(Icons.language, 'Language (Arabic/English)'),
               _tile(Icons.notifications_outlined, 'Notifications'),
               _tile(Icons.dark_mode_outlined, 'Dark Mode'),
+              _tile(Icons.link, 'Backend URL', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()))),
             ]),
             const SizedBox(height: 16),
             _section('Financial', [
@@ -99,4 +101,3 @@ class ProfileScreen extends StatelessWidget {
     onTap: onTap ?? () {},
   );
 }
-EOF

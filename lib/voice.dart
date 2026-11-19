@@ -98,4 +98,3 @@ class _VoiceEntryButtonState extends State<VoiceEntryButton> {
     );
   }
 }
-EOF

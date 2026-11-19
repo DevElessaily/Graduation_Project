@@ -102,4 +102,3 @@ class _IncomeScreenState extends State<IncomeScreen> {
     );
   }
 }
-EOF
